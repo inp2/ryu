@@ -1,0 +1,38 @@
+from mininet.net import Mininet
+from mininet.node import UserSwitch, Controller, RemoteController
+from mininet.cli import CLI
+
+def int2dpid( dpid ):
+    try:
+        dpid = hex( dpid )[ 2: ]
+        dpid = '0' * ( 16 - len( dpid ) ) + dpid
+        return dpid
+    except IndexError:
+        raise Exception( 'Unable to derive default datapath ID - '
+                         'please either specify a dpid or use a '
+                         'canonical switch name such as s23.' )
+
+
+net = Mininet(switch = UserSwitch)
+
+client = net.addHost('client', ip='10.0.0.3')
+h1 = net.addHost('h1', ip='10.0.0.1')
+h2 = net.addHost('h2', ip='10.0.0.2')
+
+s1 = net.addSwitch('s1')
+s2 = net.addSwitch('s2')
+s3 = net.addSwitch('s3')
+
+net.addLink(s1, s3)
+net.addLink(s2, s3)
+net.addLink(s3, client)
+net.addLink(s1, h1)
+net.addLink(s2, h2)
+net.addLink(s1, s2)
+
+c0 = net.addController('c0', controller=RemoteController)
+
+net.start()
+CLI(net)
+net.stop()
+
